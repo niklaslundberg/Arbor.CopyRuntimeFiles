@@ -1,9 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arbor.CopyRuntimeFiles", "Arbor.CopyRuntimeFiles\Arbor.CopyRuntimeFiles.csproj", "{D3B10AE9-55A6-4C58-8EF1-6E9827903F19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arbor.CopyRuntimeFiles", "Arbor.CopyRuntimeFiles\Arbor.CopyRuntimeFiles.csproj", "{D3B10AE9-55A6-4C58-8EF1-6E9827903F19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40D84EDE-274F-4562-80A8-5132E2AAD08D}"
+	ProjectSection(SolutionItems) = preProject
+		..\.editorconfig = ..\.editorconfig
+		..\.gitattributes = ..\.gitattributes
+		..\.gitignore = ..\.gitignore
+		..\build\build.bat = ..\build\build.bat
+		..\LICENSE.txt = ..\LICENSE.txt
+		..\version.json = ..\version.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
