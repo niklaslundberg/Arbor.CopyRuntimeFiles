@@ -13,7 +13,7 @@ namespace Arbor.CopyRuntimeFiles
     {
         private static IContainer _container;
 
-        private readonly List<string> _blackListed = new List<string>{ "node_modules", "bin", "obj" };
+        private readonly List<string> _blackListedDirectories = new List<string>{ "node_modules", "bin", "obj" };
 
         private readonly List<string> _blackListedFileExtensions = new List<string>{ ".tmp" };
 
@@ -52,7 +52,7 @@ namespace Arbor.CopyRuntimeFiles
             {
                 string[] blackListedItems = args[3].Split(';');
 
-                _blackListed.AddRange(blackListedItems);
+                _blackListedDirectories.AddRange(blackListedItems);
             }
 
             var sourceDirectory = new DirectoryInfo(Path.Combine(rootDirectory, sourceDirectoryRelativePath));
@@ -70,12 +70,14 @@ namespace Arbor.CopyRuntimeFiles
                 return Task.FromResult(0);
             }
 
+            bool skipChanged = args.Any(arg => arg.Equals(Constants.SkipChanged, StringComparison.OrdinalIgnoreCase));
+
             Console.WriteLine($"Using source directory '{sourceDirectory.FullName}'");
             Console.WriteLine($"Using target directory '{targetDirectory.FullName}'");
 
             Console.WriteLine();
             Console.WriteLine("[Black-listed]");
-            foreach (string blackListedItem in _blackListed)
+            foreach (string blackListedItem in _blackListedDirectories)
             {
                 Console.WriteLine($"\t* '{blackListedItem}'");
             }
@@ -96,7 +98,7 @@ namespace Arbor.CopyRuntimeFiles
 
             foreach (string filter in filters)
             {
-                CreateWatcher(sourceDirectory, sourceDirectory, filter, targetDirectory);
+                CreateWatcher(sourceDirectory, sourceDirectory, filter, targetDirectory, skipChanged);
             }
 
             _ResetEvent.Wait();
@@ -110,9 +112,10 @@ namespace Arbor.CopyRuntimeFiles
             DirectoryInfo sourceRootDirectory,
             DirectoryInfo currentDirectory,
             string filePattern,
-            DirectoryInfo targetDirectory)
+            DirectoryInfo targetDirectory,
+            bool skipChanged)
         {
-            if (_blackListed.Any(blackListedItem =>
+            if (_blackListedDirectories.Any(blackListedItem =>
                 blackListedItem.Equals(currentDirectory.Name, StringComparison.OrdinalIgnoreCase)))
             {
                 return;
@@ -122,34 +125,35 @@ namespace Arbor.CopyRuntimeFiles
 
             Console.WriteLine($"Created watcher for {filePattern} '{currentDirectory.FullName}'");
 
-            fileSystemWatcher.Changed += (sender, eventArgs) =>
+            if (!skipChanged)
             {
-                try
+                fileSystemWatcher.Changed += (sender, eventArgs) =>
                 {
-                    fileSystemWatcher.EnableRaisingEvents = false;
+                    try
+                    {
+                        fileSystemWatcher.EnableRaisingEvents = false;
 
-                    CopyFile(sourceRootDirectory,
-                        targetDirectory,
-                        eventArgs.FullPath,
-                        eventArgs.ChangeType,
-                        currentDirectory.FullName);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Could not copy changed file '{eventArgs.FullPath}'. {ex}");
-                }
-                finally
-                {
-                    fileSystemWatcher.EnableRaisingEvents = true;
-                }
-            };
+                        CopyFile(sourceRootDirectory,
+                            targetDirectory,
+                            eventArgs.FullPath,
+                            eventArgs.ChangeType,
+                            currentDirectory.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Could not copy changed file '{eventArgs.FullPath}'. {ex}");
+                    }
+                    finally
+                    {
+                        fileSystemWatcher.EnableRaisingEvents = true;
+                    }
+                };
+            }
 
             fileSystemWatcher.Renamed += (sender, eventArgs) =>
             {
                 try
                 {
-                    fileSystemWatcher.EnableRaisingEvents = false;
-
                     CopyFile(sourceRootDirectory,
                         targetDirectory,
                         eventArgs.FullPath,
@@ -198,7 +202,7 @@ namespace Arbor.CopyRuntimeFiles
 
             foreach (DirectoryInfo subDirectory in currentDirectory.GetDirectories())
             {
-                CreateWatcher(sourceRootDirectory, subDirectory, filePattern, targetDirectory);
+                CreateWatcher(sourceRootDirectory, subDirectory, filePattern, targetDirectory, skipChanged);
             }
         }
 
@@ -213,6 +217,7 @@ namespace Arbor.CopyRuntimeFiles
             if (_blackListedFileExtensions.Any(blackListed =>
                 blackListed.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
+                //Console.WriteLine($"Skipping black-listed file '{fileFullPath}'");
                 return;
             }
 

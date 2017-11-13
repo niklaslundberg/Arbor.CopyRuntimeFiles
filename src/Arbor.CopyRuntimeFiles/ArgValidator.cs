@@ -1,8 +1,10 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Arbor.CopyRuntimeFiles
 {
-    internal class ArgValidator
+    [UsedImplicitly]
+    internal sealed class ArgValidator
     {
         public int Validate(string[] args)
         {
@@ -10,6 +12,7 @@ namespace Arbor.CopyRuntimeFiles
             Console.WriteLine("Second argument: target project, relative to repository root, example: 'src\\TargetProject\\");
             Console.WriteLine("Third argument: filters, semicolon separated list of extensions, example: *.cshtml;*.pdf");
             Console.WriteLine("Fourth argument: optional black-listed directory names, semicolon separated, example: bin;obj;node_modules");
+            Console.WriteLine($"Flag argument '{Constants.SkipChanged}': skip file changed event");
 
             if (args.Length == 0)
             {
