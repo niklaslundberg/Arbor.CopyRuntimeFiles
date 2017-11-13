@@ -6,9 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Arbor.Aesculus.Core;
 using Autofac;
+using JetBrains.Annotations;
 
 namespace Arbor.CopyRuntimeFiles
 {
+    [UsedImplicitly]
     internal class App
     {
         private static IContainer _container;
