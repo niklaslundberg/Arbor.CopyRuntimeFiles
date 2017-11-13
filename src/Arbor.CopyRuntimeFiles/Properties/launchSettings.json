@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Arbor.CopyRuntimeFiles": {
+      "commandName": "Project",
+      "commandLineArgs": "code\\Dobs.Web.Runtime\\ code\\Dobs.Web\\ *.cshtml;*.css security",
+      "workingDirectory": "C:\\Projects\\Dobs"
+    }
+  }
+}
